@@ -19,7 +19,7 @@ Run `pulumi up` from your terminal. You'll see some output that indicates your b
 We'll observe Pulumi's ability to output properties of the bucket. Add the following to your `__main__.py`
 
 ```python
-pulumi.export("bucketName", bucket.bucket)
+pulumi.export("bucket_name", bucket.bucket)
 ```
 
 Run `pulumi up` again.
@@ -47,9 +47,12 @@ Run `pulumi up` again. You'll notice that because the name of the bucket has cha
 Finally modify the bucket to add some tags. Update your `__main__.py` like so:
 
 ```python
-bucket = s3.Bucket('the-bucket', tags={
-	"Owner": "lbriggs",
-})
+bucket = aws.s3.Bucket(
+    "the-bucket",
+    tags={
+        "Owner": "lbriggs",
+    }
+)
 ```
 
 Run `pulumi up` and note the difference: Pulumi can modify the tags on the bucket without needing to create a new bucket, so it modify the bucket in place.

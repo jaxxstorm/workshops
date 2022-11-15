@@ -11,18 +11,7 @@ Here, we'll create an empty component called webserver:
 ```python
 # webserver.py
 # An example component
-import pulumi
-
-class WebServerArgs:
-    def __init__(self, instance_type: pulumi.Input[str]):
-        self.instance_type = instance_type
-
-
-class WebServer(pulumi.ComponentResource):
-    def __init__(
-        self, name: str, args: WebServerArgs, opts: pulumi.ResourceOptions = None
-    ):
-        super().__init__("custom:app:WebServer", name, {}, opts)
+webserv
 ```
 
 Our webserver has two classes, one which contains the actual webserver itself, and one for its args. 
@@ -51,7 +40,6 @@ Now inside your component resource, let's add some simple resources.
 
 ```python
 # webserver.py
-
 import pulumi
 import pulumi_aws as aws
 
@@ -114,7 +102,7 @@ We now need to update the `__main__.py` to ensure we're passing a vpc id to our 
 We're going to look up the default VPC using a `get` call. This allows us to retrieve information for resources we haven't provisioned using Pulumi.
 
 ```python
-import pulumi
+from webserver import WebServer, WebServerArgs
 import pulumi_aws as aws
 
 vpc = aws.ec2.get_vpc(default=True)

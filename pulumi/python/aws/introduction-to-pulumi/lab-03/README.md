@@ -7,7 +7,7 @@ Pulumi uses an asynchronous input and out mechanism to allow it to build a resou
 We want to upload some files to our S3 bucket. Create a directory called `www` and create two files within it:
 
 - `index.html` - Add some HTML to this, like `<p>Hello world!</p>`
-- `404.html - Add some HTML, like `<p>This is an error</p>`
+- `404.html` - Add some HTML, like `<p>This is an error</p>`
 
 ## Add bucket object 
 
@@ -46,7 +46,7 @@ You'll notice that the bucket objects are created after the bucket is created.
 
 This is because the objects are passed the `bucket.id` output. This tells Pulumi that the `bucket.id` must be resolved (ie: returned from the API) before it can create the bucket objects.
 
-This input/output system is how Pulumi builds is declarative graph and tracks dependencies.
+This input/output system is how Pulumi builds is a declarative graph and tracks dependencies.
 
 ### Usage of standard python packages
 
@@ -83,9 +83,7 @@ bucket_policy = aws.s3.BucketPolicy(
             "Version": "2012-10-17",
             "Statement": [{
                 "Effect": "Allow",
-                "Principal": {
-                    "Service": ["s3.amazonaws.com"]
-                },
+                "Principal": "*"
                 "Action": [
                     "s3:GetObject"
                 ],
@@ -97,8 +95,34 @@ bucket_policy = aws.s3.BucketPolicy(
     opts=pulumi.ResourceOptions(parent=bucket)
 )
 ```
-Note the `bucket.arn.apply` statement here. Once we are inside this `apply` block, we are able to use the arn in the `json.dumps` function as we'd expect to with any other string.
+Note the `bucket.arn.apply` statement here. Once we are inside this `apply` block, we can use the arn in the `json.dumps` function as we'd expect to with any other string.
 
-Run `pulumi up` to finish your provisioning. Observe the bucket we have created, the objects and the policy associated.
+## Configure Website
+
+The final step here is to make our S3 bucket have some website configuration, so it works as a static website. Modify the bucket configuration to indicate you wish to use it as a website, like so:
+
+```python
+bucket = aws.s3.Bucket(
+    "the-bucket",
+    tags={
+        "Owner": "lbriggs",
+    },
+    acl="public-read",
+    website=aws.s3.BucketWebsiteArgs(
+        index_document="index.html",
+        error_document="404.html",
+    )
+)
+```
+
+You'll notice here we're using strongly type arguments as part of Python's type system. We can then export the website endpoint like so:
+
+```python
+pulumi.export("bucket_endpoint", bucket.website_endpoint)
+```
+
+Run `pulumi up` to finish your provisioning. Observe the bucket we have created, the objects and the policy associated. We can also navigate to the website:
+
+
 
 Then run `pulumi destroy` to destroy the resources

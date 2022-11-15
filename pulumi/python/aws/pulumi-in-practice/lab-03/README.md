@@ -11,7 +11,7 @@ target_group = aws.lb.TargetGroup(
 	port=80,
 	protocol="HTTP",
 	target_type="ip",
-	vpc_id=vpc.id,
+	vpc_id=args.vpc_id,
 	opts=pulumi.ResourceOptions(parent=self)
 )
 ```
@@ -23,16 +23,16 @@ Now we'll define an ALB listener that listens on port 80
 ```python
 # define a listener
 listener = aws.lb.Listener(
-	f"{name}-listener",
-	load_balancer_arn=lb.arn,
-	port=80,
-	default_actions=[
-		{
-		    "type": "forward",
-			"target_group_arn": target_group.arn,
-		}
-	],
-	opts=pulumi.ResourceOptions(parent=lb),
+    f"{name}-listener",
+    load_balancer_arn=self.lb.arn,
+    port=80,
+    default_actions=[
+        {
+            "type": "forward",
+            "target_group_arn": target_group.arn,
+        }
+    ],
+    opts=pulumi.ResourceOptions(parent=self.lb),
 )
 ```
 
@@ -140,7 +140,7 @@ class WebServer(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self.lb),
         )
 
-        user_data = '#!/bin/bash echo "Hello, World!" > index.html nohup python3 -m SimpleHTTPServer 80 &'
+        user_data = '#!/bin/bash yum install -y httpd && systemctl enable httpd && systemctl start httpd && echo "Hello, World" > /var/www/html/index.html'
 
         for i, subnet_name in enumerate(args.subnet_ids, start=0):
             server = aws.ec2.Instance(
