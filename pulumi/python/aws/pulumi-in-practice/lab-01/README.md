@@ -11,7 +11,15 @@ Here, we'll create an empty component called webserver:
 ```python
 # webserver.py
 # An example component
-webserv
+import pulumi
+class WebServerArgs:
+    def __init__(self, instance_type: pulumi.Input[str]):
+        self.instance_type = instance_type
+class WebServer(pulumi.ComponentResource):
+    def __init__(
+        self, name: str, args: WebServerArgs, opts: pulumi.ResourceOptions = None
+    ):
+        super().__init__("custom:app:WebServer", name, {}, opts)
 ```
 
 Our webserver has two classes, one which contains the actual webserver itself, and one for its args. 
